@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+.next
+.nuxt
+.output
+.svelte-kit
+.vitepress
+.docusaurus
+.serverless
+.dynamodb
+.firebase
+.tern-port
+.vscode-test

@@ -1,0 +1,48 @@
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:8.0.0
+    container_name: taskboard-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - taskboard-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskboard-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env.example
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - taskboard-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  taskboard-network:
+    driver: bridge
+
