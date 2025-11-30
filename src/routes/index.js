@@ -7,13 +7,15 @@ import projectRoutes from './project.routes.js';
 import columnRoutes from './column.routes.js';
 import taskRoutes from './task.routes.js';
 
+import { rateLimit } from '#src/middlewares/rate.limiter.js';
+
 const router = Router();
 
-router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
-router.use('/folders', folderRoutes);
-router.use('/projects', projectRoutes);
-router.use('/columns', columnRoutes);
-router.use('/tasks', taskRoutes);
+router.use('/auth', rateLimit('auth'), authRoutes);
+router.use('/users', rateLimit('user'), userRoutes);
+router.use('/folders', rateLimit('folder'), folderRoutes);
+router.use('/projects', rateLimit('project'), projectRoutes);
+router.use('/columns', rateLimit('column'), columnRoutes);
+router.use('/tasks', rateLimit('task'), taskRoutes);
 
 export default router;
