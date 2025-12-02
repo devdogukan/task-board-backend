@@ -10,8 +10,12 @@ vi.mock('#src/models/index.js', () => {
     
     const mockProjectFindById = vi.fn();
     
-    const mockTaskUpdateMany = vi.fn();
-    const mockTaskDeleteMany = vi.fn();
+    const mockTaskUpdateMany = vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    });
+    const mockTaskDeleteMany = vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue({ deletedCount: 1 }),
+    });
     
     class MockColumn {
         constructor(data) {
@@ -25,7 +29,9 @@ vi.mock('#src/models/index.js', () => {
     MockColumn.find = mockColumnFind;
     MockColumn.findOne = mockColumnFindOne;
     MockColumn.findByIdAndDelete = mockColumnFindByIdAndDelete;
-    MockColumn.updateMany = mockColumnUpdateMany;
+    MockColumn.updateMany = vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    });
     
     return {
         Column: MockColumn,
@@ -63,6 +69,14 @@ vi.mock('#src/services/project.service.js', () => {
         },
     };
 });
+
+vi.mock('#src/config/database.js', () => ({
+    withTransaction: async (callback) => {
+        // Mock session object
+        const mockSession = {};
+        return await callback(mockSession);
+    },
+}));
 
 // Import after mocks
 import * as columnService from '#src/services/column.service.js';
@@ -288,8 +302,9 @@ describe('Column Service', () => {
                 sort: vi.fn().mockResolvedValue([otherColumn]),
             };
             mockColumnFind.mockReturnValue(mockQuery);
-            mockTaskUpdateMany.mockResolvedValue({ modifiedCount: 3 });
-            mockColumnFindByIdAndDelete.mockResolvedValue(columnData);
+            mockColumnFindByIdAndDelete.mockReturnValue({
+                session: vi.fn().mockResolvedValue(columnData),
+            });
 
             const result = await columnService.deleteColumn(columnId, userId);
 
@@ -322,8 +337,9 @@ describe('Column Service', () => {
                 sort: vi.fn().mockResolvedValue([]),
             };
             mockColumnFind.mockReturnValue(mockQuery);
-            mockTaskDeleteMany.mockResolvedValue({ deletedCount: 5 });
-            mockColumnFindByIdAndDelete.mockResolvedValue(columnData);
+            mockColumnFindByIdAndDelete.mockReturnValue({
+                session: vi.fn().mockResolvedValue(columnData),
+            });
 
             const result = await columnService.deleteColumn(columnId, userId);
 
@@ -358,20 +374,23 @@ describe('Column Service', () => {
                 { _id: '507f1f77bcf86cd799439015', orderIndex: 1 },
             ];
 
+            const mockPopulateWithSession = vi.fn().mockResolvedValue({
+                ...columnData,
+                orderIndex: 1,
+            });
+            const mockPopulate = vi.fn().mockReturnValue({
+                session: mockPopulateWithSession,
+            });
             mockColumnFindById
                 .mockResolvedValueOnce(columnData)
                 .mockReturnValueOnce({
-                    populate: vi.fn().mockResolvedValue({
-                        ...columnData,
-                        orderIndex: 1,
-                    }),
+                    populate: mockPopulate,
                 });
             mockValidateProjectAccess.mockResolvedValue({ project: projectData });
             const mockQuery = {
                 sort: vi.fn().mockResolvedValue(columns),
             };
             mockColumnFind.mockReturnValue(mockQuery);
-            mockColumnUpdateMany.mockResolvedValue({ modifiedCount: 1 });
 
             const result = await columnService.reorderColumn(columnId, 1, userId);
 

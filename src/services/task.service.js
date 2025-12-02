@@ -1,6 +1,7 @@
-import { Task, Project, Column, User, Folder } from '#src/models/index.js';
+import { Task, Column, User } from '#src/models/index.js';
 import { NotFoundError, BadRequestError } from '#src/utils/errors/index.js';
 import { validateProjectAccess } from '#src/services/project.service.js';
+import { withTransaction } from '#src/config/database.js';
 
 export const createTask = async (projectId, taskData, userId) => {
     // Check if project exists and user has access

@@ -6,7 +6,9 @@ vi.mock('#src/models/index.js', () => {
     const mockTaskFind = vi.fn();
     const mockTaskFindOne = vi.fn();
     const mockTaskFindByIdAndDelete = vi.fn();
-    const mockTaskUpdateMany = vi.fn();
+    const mockTaskUpdateMany = vi.fn().mockReturnValue({
+        session: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    });
     
     const mockProjectFindById = vi.fn();
     
@@ -77,6 +79,14 @@ vi.mock('#src/services/project.service.js', () => {
         },
     };
 });
+
+vi.mock('#src/config/database.js', () => ({
+    withTransaction: async (callback) => {
+        // Mock session object
+        const mockSession = {};
+        return await callback(mockSession);
+    },
+}));
 
 // Import after mocks
 import * as taskService from '#src/services/task.service.js';
@@ -573,7 +583,10 @@ describe('Task Service', () => {
                 ...taskData,
                 orderIndex: 1,
             };
-            const mockPopulate3 = vi.fn().mockResolvedValue(updatedTask);
+            const mockPopulateWithSession = vi.fn().mockResolvedValue(updatedTask);
+            const mockPopulate3 = vi.fn().mockReturnValue({
+                session: mockPopulateWithSession,
+            });
             const mockPopulate2 = vi.fn().mockReturnValue({
                 populate: mockPopulate3,
             });
@@ -591,7 +604,6 @@ describe('Task Service', () => {
                 sort: vi.fn().mockResolvedValue(tasks),
             };
             mockTaskFind.mockReturnValue(mockQuery);
-            mockTaskUpdateMany.mockResolvedValue({ modifiedCount: 1 });
 
             const result = await taskService.reorderTask(taskId, 1, userId);
 

@@ -115,12 +115,15 @@ describe('Project Service', () => {
 
             mockFolderFindOne.mockResolvedValue(folderData);
             
-            const mockPopulate3 = vi.fn().mockResolvedValue({
+            const mockPopulateWithSession = vi.fn().mockResolvedValue({
                 _id: projectId,
                 ...projectData,
                 folderId,
                 owner: userId,
                 status: 'active',
+            });
+            const mockPopulate3 = vi.fn().mockReturnValue({
+                session: mockPopulateWithSession,
             });
             const mockPopulate2 = vi.fn().mockReturnValue({
                 populate: mockPopulate3,
