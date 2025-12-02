@@ -1,9 +1,15 @@
 services:
-  # MongoDB Service
+  # MongoDB Service with Replica Set
   mongodb:
     image: mongo:8.0.0
     container_name: taskboard-mongodb
     restart: unless-stopped
+    entrypoint: >
+      /bin/bash -c '
+      openssl rand -base64 756 > /data/keyfile.key &&
+      chmod 400 /data/keyfile.key &&
+      chown mongodb:mongodb /data/keyfile.key &&
+      /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --keyFile /data/keyfile.key --bind_ip_all'
     ports:
       - "27017:27017"
     environment:
@@ -11,13 +17,21 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
     networks:
       - taskboard-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: >
+        mongosh -u admin -p password --eval "
+        try { 
+          rs.status() 
+        } catch (err) { 
+          rs.initiate({_id:'rs0', members:[{_id:0, host:'mongodb:27017'}]}) 
+        }" --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
 
   # Node.js Application Service
   app:
@@ -40,6 +54,8 @@ services:
 
 volumes:
   mongodb_data:
+    driver: local
+  mongodb_config:
     driver: local
 
 networks:
