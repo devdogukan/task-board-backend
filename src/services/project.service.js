@@ -45,7 +45,8 @@ export const createProject = async (folderId, projectData, userId) => {
         return await Project.findById(project._id)
             .populate('owner', 'firstName lastName email avatar')
             .populate('members', 'firstName lastName email avatar')
-            .populate('folderId', 'name');
+            .populate('folderId', 'name')
+            .session(session);
     });
 };
 
