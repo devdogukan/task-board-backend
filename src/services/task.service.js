@@ -190,6 +190,7 @@ export const reorderTask = async (taskId, newOrderIndex, userId) => {
         throw new BadRequestError('Invalid order index');
     }
 
+    return await withTransaction(async (session) => {
     // Reorder tasks
     if (oldOrderIndex < newOrderIndex) {
         // Moving down
@@ -199,7 +200,7 @@ export const reorderTask = async (taskId, newOrderIndex, userId) => {
                 orderIndex: { $gt: oldOrderIndex, $lte: newOrderIndex },
             },
             { $inc: { orderIndex: -1 } }
-        );
+        ).session(session);
     } else {
         // Moving up
         await Task.updateMany(
@@ -208,16 +209,18 @@ export const reorderTask = async (taskId, newOrderIndex, userId) => {
                 orderIndex: { $gte: newOrderIndex, $lt: oldOrderIndex },
             },
             { $inc: { orderIndex: 1 } }
-        );
+        ).session(session);
     }
 
     task.orderIndex = newOrderIndex;
-    await task.save();
+    await task.save({ session });
 
     return await Task.findById(task._id)
         .populate('assignees', 'firstName lastName email avatar')
         .populate('columnId', 'name orderIndex')
-        .populate('projectId', 'name');
+        .populate('projectId', 'name')
+        .session(session);
+    });
 };
 
 export const addAssigneeToTask = async (taskId, assigneeId, userId) => {
