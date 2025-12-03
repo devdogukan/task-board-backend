@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 export const createProjectSchema = Joi.object({
     name: Joi.string().required().min(1).max(100).messages({
@@ -30,22 +31,30 @@ export const updateProjectSchema = Joi.object({
 
 export const projectIdSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'ID must be a valid MongoDB ObjectId',
-            'string.empty': 'ID is required',
+            'any.invalid': 'ID must be a valid MongoDB ObjectId',
             'any.required': 'ID is required',
         }),
 });
 
 export const folderIdSchema = Joi.object({
     folderId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Folder ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Folder ID is required',
+            'any.invalid': 'Folder ID must be a valid MongoDB ObjectId',
             'any.required': 'Folder ID is required',
         }),
 });
@@ -59,30 +68,42 @@ export const updateProjectStatusSchema = Joi.object({
 
 export const addMemberSchema = Joi.object({
     memberId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Member ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Member ID is required',
+            'any.invalid': 'Member ID must be a valid MongoDB ObjectId',
             'any.required': 'Member ID is required',
         }),
 });
 
 export const removeMemberSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Project ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Project ID is required',
+            'any.invalid': 'Project ID must be a valid MongoDB ObjectId',
             'any.required': 'Project ID is required',
         }),
     userId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'User ID must be a valid MongoDB ObjectId',
-            'string.empty': 'User ID is required',
+            'any.invalid': 'User ID must be a valid MongoDB ObjectId',
             'any.required': 'User ID is required',
         }),
 });

@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 export const createColumnSchema = Joi.object({
     name: Joi.string().required().min(1).max(50).messages({
@@ -20,22 +21,30 @@ export const updateColumnSchema = Joi.object({
 
 export const columnIdSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'ID must be a valid MongoDB ObjectId',
-            'string.empty': 'ID is required',
+            'any.invalid': 'ID must be a valid MongoDB ObjectId',
             'any.required': 'ID is required',
         }),
 });
 
 export const projectIdSchema = Joi.object({
     projectId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Project ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Project ID is required',
+            'any.invalid': 'Project ID must be a valid MongoDB ObjectId',
             'any.required': 'Project ID is required',
         }),
 });

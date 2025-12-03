@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 export const registerSchema = Joi.object({
     email: Joi.string().email().required().messages({
@@ -42,11 +43,15 @@ export const loginSchema = Joi.object({
 
 export const getUserByIdSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'ID must be a valid MongoDB ObjectId',
-            'string.empty': 'ID is required',
+            'any.invalid': 'ID must be a valid MongoDB ObjectId',
             'any.required': 'ID is required',
         }),
 });
@@ -70,11 +75,15 @@ export const updateUserSchema = Joi.object({
 
 export const deleteUserSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'ID must be a valid MongoDB ObjectId',
-            'string.empty': 'ID is required',
+            'any.invalid': 'ID must be a valid MongoDB ObjectId',
             'any.required': 'ID is required',
         }),
 });

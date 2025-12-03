@@ -550,6 +550,7 @@ describe('PUT /api/tasks/:id', () => {
     describe('Successful update', () => {
         it('should update task successfully with 200 status', async () => {
             const updateData = {
+                columnId: testColumn._id.toString(),
                 title: 'Updated Task',
                 description: 'Updated Description',
             };
@@ -578,6 +579,7 @@ describe('PUT /api/tasks/:id', () => {
 
         it('should update priority', async () => {
             const updateData = {
+                columnId: testColumn._id.toString(),
                 priority: 'high',
             };
 
@@ -588,6 +590,24 @@ describe('PUT /api/tasks/:id', () => {
                 .expect(200);
 
             expect(response.body.data.priority).toBe('high');
+        });
+
+        it('should update assignees', async () => {
+            const updateData = {
+                columnId: testColumn._id.toString(),
+                assignees: [testUser._id.toString()],
+            };
+
+            const response = await request(app)
+                .put(`/api/tasks/${testTask._id}`)
+                .set('Authorization', `Bearer ${authToken}`)
+                .send(updateData)
+                .expect(200);
+
+            expect(response.body.data.assignees).toBeDefined();
+            expect(Array.isArray(response.body.data.assignees)).toBe(true);
+            expect(response.body.data.assignees.length).toBe(1);
+            expect(response.body.data.assignees[0]._id || response.body.data.assignees[0]).toBe(testUser._id.toString());
         });
     });
 
@@ -610,7 +630,24 @@ describe('PUT /api/tasks/:id', () => {
                 .put(`/api/tasks/${testTask._id}`)
                 .set('Authorization', `Bearer ${authToken}`)
                 .send({
+                    columnId: testColumn._id.toString(),
                     priority: 'invalid-priority',
+                })
+                .expect(400);
+
+            expect(response.body).toMatchObject({
+                success: false,
+                message: 'Validation error',
+            });
+        });
+
+        it('should return 400 error when assignees format is invalid', async () => {
+            const response = await request(app)
+                .put(`/api/tasks/${testTask._id}`)
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({
+                    columnId: testColumn._id.toString(),
+                    assignees: ['invalid-id'],
                 })
                 .expect(400);
 

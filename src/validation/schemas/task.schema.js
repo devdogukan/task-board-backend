@@ -3,11 +3,15 @@ import { ObjectId } from 'mongodb';
 
 export const createTaskSchema = Joi.object({
     columnId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Column ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Column ID is required',
+            'any.invalid': 'Column ID must be a valid MongoDB ObjectId',
             'any.required': 'Column ID is required',
         }),
     title: Joi.string().required().min(1).max(200).messages({
