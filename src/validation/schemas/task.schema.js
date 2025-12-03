@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ObjectId } from 'mongodb';
 
 export const createTaskSchema = Joi.object({
     columnId: Joi.string()
@@ -27,14 +28,28 @@ export const createTaskSchema = Joi.object({
     dueDate: Joi.date().optional().allow(null).messages({
         'date.base': 'Due date must be a valid date',
     }),
+    assignees: Joi.array().items(Joi.string().custom((value, helpers) => {
+        if (!ObjectId.isValid(value)) {
+            return helpers.error('any.invalid');
+        }
+        return value;
+    })).optional().messages({
+        'array.items': 'Assignees must be an array of valid MongoDB ObjectIds',
+        'any.invalid': 'Assignees must be an array of valid MongoDB ObjectIds',
+    }),
 });
 
 export const updateTaskSchema = Joi.object({
     columnId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .optional()
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
+        .required()
         .messages({
-            'string.pattern.base': 'Column ID must be a valid MongoDB ObjectId',
+            'any.invalid': 'Column ID must be a valid MongoDB ObjectId',
         }),
     title: Joi.string().optional().min(1).max(200).messages({
         'string.min': 'Task title must be at least 1 character long',
@@ -50,39 +65,60 @@ export const updateTaskSchema = Joi.object({
     dueDate: Joi.date().optional().allow(null).messages({
         'date.base': 'Due date must be a valid date',
     }),
+    assignees: Joi.array().items(Joi.string().custom((value, helpers) => {
+        if (!ObjectId.isValid(value)) {
+            return helpers.error('any.invalid');
+        }
+        return value;
+    })).optional().messages({
+        'array.items': 'Assignees must be an array of valid MongoDB ObjectIds',
+        'any.invalid': 'Assignees must be an array of valid MongoDB ObjectIds',
+    }),
 }).min(1).messages({
     'object.min': 'At least one field must be provided for update',
 });
 
 export const taskIdSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'ID must be a valid MongoDB ObjectId',
-            'string.empty': 'ID is required',
+            'any.invalid': 'ID must be a valid MongoDB ObjectId',
             'any.required': 'ID is required',
         }),
 });
 
 export const projectIdSchema = Joi.object({
     projectId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Project ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Project ID is required',
+            'any.invalid': 'Project ID must be a valid MongoDB ObjectId',
             'any.required': 'Project ID is required',
         }),
 });
 
 export const moveTaskSchema = Joi.object({
     columnId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Column ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Column ID is required',
+            'any.invalid': 'Column ID must be a valid MongoDB ObjectId',
             'any.required': 'Column ID is required',
         }),
 });
@@ -98,46 +134,68 @@ export const reorderTaskSchema = Joi.object({
 
 export const addAssigneeSchema = Joi.object({
     assigneeId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Assignee ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Assignee ID is required',
+            'any.invalid': 'Assignee ID must be a valid MongoDB ObjectId',
             'any.required': 'Assignee ID is required',
         }),
 });
 
 export const removeAssigneeSchema = Joi.object({
     id: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'Task ID must be a valid MongoDB ObjectId',
-            'string.empty': 'Task ID is required',
+            'any.invalid': 'Task ID must be a valid MongoDB ObjectId',
             'any.required': 'Task ID is required',
         }),
     userId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .required()
         .messages({
-            'string.pattern.base': 'User ID must be a valid MongoDB ObjectId',
-            'string.empty': 'User ID is required',
+            'any.invalid': 'User ID must be a valid MongoDB ObjectId',
             'any.required': 'User ID is required',
         }),
 });
 
 export const getTasksQuerySchema = Joi.object({
     columnId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .optional()
         .messages({
-            'string.pattern.base': 'Column ID must be a valid MongoDB ObjectId',
+            'any.invalid': 'Column ID must be a valid MongoDB ObjectId',
         }),
     assigneeId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+        .custom((value, helpers) => {
+            if (!ObjectId.isValid(value)) {
+                return helpers.error('any.invalid');
+            }
+            return value;
+        })
         .optional()
         .messages({
-            'string.pattern.base': 'Assignee ID must be a valid MongoDB ObjectId',
+            'any.invalid': 'Assignee ID must be a valid MongoDB ObjectId',
         }),
     priority: Joi.string().valid('low', 'medium', 'high').optional().messages({
         'any.only': 'Priority must be one of: low, medium, high',
