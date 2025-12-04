@@ -33,22 +33,40 @@ services:
       start_period: 0s
       retries: 30
 
-  # Node.js Application Service
-  app:
+  # Node.js Backend Service
+  server:
     build:
-      context: .
+      context: ./server
       dockerfile: Dockerfile
-    container_name: taskboard-app
+    container_name: taskboard-server
     restart: unless-stopped
     ports:
       - "5000:5000"
     env_file:
-      - .env.example
+      - ./server/.env.production
+    environment:
+      - NODE_ENV=production
     volumes:
-      - ./logs:/app/logs
+      - ./server/logs:/app/logs
     depends_on:
       mongodb:
         condition: service_healthy
+    networks:
+      - taskboard-network
+
+  # React Frontend Service
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: taskboard-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client/.env.production
+    depends_on:
+      - server
     networks:
       - taskboard-network
 
